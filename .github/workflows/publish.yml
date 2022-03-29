@@ -16,11 +16,14 @@ jobs:
       - name: Run tests
         run: mvn test
       - name: Generate tag
-        run: echo ::set-output name=value::$(mvn -q help:evaluate -Dexpression=project.version -DforceStdout)
+        run: echo ::set-output name=tag::$(mvn -q help:evaluate -Dexpression=project.version -DforceStdout)
+        id: vesionstamp
+      - name: Generate tag
+        run: echo ::set-output name=date::$(date +'%Y%m%d.%H%M%S')
         id: timestamp
 
       - name: Generate Docker image
-        run: mvn spring-boot:build-image -DskipTests -Dspring-boot.build-image.imageName=${{ secrets.DOCKERHUB_USERNAME }}/items:v1
+        run: mvn spring-boot:build-image -DskipTests -Dspring-boot.build-image.imageName=${{ secrets.DOCKERHUB_USERNAME }}/items:${{steps.versionstamp.output.tag}}/${{steps.timestamp.output.date}}
       - name: Login to DockerHub
         run: docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" -p "${{ secrets.DOCKERHUB_TOKEN }}" 
       - name: Push image to DockerHub
