@@ -15,6 +15,10 @@ jobs:
           java-version: '17'
       - name: Run tests
         run: mvn test
+      - name: Generate tag
+        run: echo ::set-output name=value::$(mvn -q help:evaluate -Dexpression=project.version -DforceStdout))
+        id: timestamp
+
       - name: Generate Docker image
         run: mvn spring-boot:build-image -DskipTests -Dspring-boot.build-image.imageName=${{ secrets.DOCKERHUB_USERNAME }}/items:v1
       - name: Login to DockerHub
